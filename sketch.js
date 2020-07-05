@@ -34,7 +34,7 @@ const sketch = () => {
     const margin = 200;
 
     return ({context, width, height}) => {
-        context.fillStyle = 'white';
+        context.fillStyle = '#E65100';
         context.fillRect(0, 0, width, height);
         points.forEach((data) => {
             const {
