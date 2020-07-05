@@ -19,7 +19,7 @@ const sketch = () => {
         return points;
     };
 
-    const points = createGrid();
+    const points = createGrid().filter(() => Math.random() > 0.5);
     const margin = 200;
 
     return ({context, width, height}) => {
