@@ -8,7 +8,7 @@ const settings = {
 };
 
 const sketch = () => {
-    const count = 50;
+    const count = 100;
     const createGrid = () => {
 
         // const palette = random.pick(palettes);
@@ -18,11 +18,12 @@ const sketch = () => {
             for (let y = 0; y < count; y++) {
                 const u = count <= 1 ? 0.5 : x / (count - 1);
                 const v = count <= 1 ? 0.5 : y / (count - 1);
-                // const radius = random.noise2D([u, v]) * 0.05;
+                const radius = Math.abs(random.noise2D(u, v) * 0.5);
                 points.push({
                     color: random.pick(palette),
                     radius: Math.max(0, random.gaussian() * 0.03),
-                    position: [u, v]
+                    position: [u, v],
+                    rotation: radius
                 });
             }
         }
@@ -30,8 +31,9 @@ const sketch = () => {
     };
 
     // random.setSeed(512);
-    const points = createGrid().filter(() => random.value() > 0.5);
-    const alphabet = ["a ", "b ", "c ", "d ", "e ", "f ", "g ", "h ", "i ", "j ", "k ", "l ", "m ", "n ", "o ", "p ", "q ", "r ", "s ", "t ", "u ", "v ", "w ", "x ", "y", "z"];
+    const points = createGrid().filter(() => random.value() > 0.25);
+    // const alphabet = ["a ", "b ", "c ", "d ", "e ", "f ", "g ", "h ", "i ", "j ", "k ", "l ", "m ", "n ", "o ", "p ", "q ", "r ", "s ", "t ", "u ", "v ", "w ", "x ", "y", "z"];
+    const alphabet = ["=","-"];
     const margin = 200;
 
     return ({context, width, height}) => {
@@ -41,7 +43,8 @@ const sketch = () => {
             const {
                 position,
                 radius,
-                color
+                color,
+                rotation
             } = data;
             const [u, v] = position;
             const x = lerp(margin, width - margin, u);
@@ -50,13 +53,15 @@ const sketch = () => {
             // context.beginPath();
             // context.arc(x, y, radius * width, 0, Math.PI * 2, false);
             // context.strokeStyle = 'black';
-            // context.lineWidth = 20;
+            // context.lineWidth = 5;
             // context.stroke();
+            context.save();
             const letter = random.pick(alphabet);
-            context.fillStyle = color;
             context.font = `${radius * width}px Helvetica`;
+            context.fillStyle = color;
             context.fillText(letter, x, y);
-            context.rotate(100);
+            context.translate(x, y);
+            context.rotate(rotation);
             context.restore();
         });
     };
