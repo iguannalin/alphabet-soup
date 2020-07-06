@@ -8,19 +8,20 @@ const settings = {
 };
 
 const sketch = () => {
+    const count = 50;
     const createGrid = () => {
+
         // const palette = random.pick(palettes);
         const palette = ['#F8C75E', '#FFBA4D', '#EDA252', '#EAAC4C'];
-
         const points = [];
-        const count = 50;
         for (let x = 0; x < count; x++) {
             for (let y = 0; y < count; y++) {
                 const u = count <= 1 ? 0.5 : x / (count - 1);
                 const v = count <= 1 ? 0.5 : y / (count - 1);
+                // const radius = random.noise2D([u, v]) * 0.05;
                 points.push({
                     color: random.pick(palette),
-                    radius: Math.max(0, random.gaussian() * 0.02),
+                    radius: Math.max(0, random.gaussian() * 0.03),
                     position: [u, v]
                 });
             }
@@ -28,7 +29,7 @@ const sketch = () => {
         return points;
     };
 
-    random.setSeed(512);
+    // random.setSeed(512);
     const points = createGrid().filter(() => random.value() > 0.5);
     const alphabet = ["a ", "b ", "c ", "d ", "e ", "f ", "g ", "h ", "i ", "j ", "k ", "l ", "m ", "n ", "o ", "p ", "q ", "r ", "s ", "t ", "u ", "v ", "w ", "x ", "y", "z"];
     const margin = 200;
