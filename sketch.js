@@ -1,81 +1,66 @@
 const canvasSketch = require('canvas-sketch');
-const {lerp} = require('canvas-sketch-util/math');
+const { lerp } = require('canvas-sketch-util/math');
+const palettes = require('nice-color-palettes/1000.json');
 const random = require('canvas-sketch-util/random');
-const palettes = require('nice-color-palettes');
+
+let palette = random.pick(palettes);
+
+palette = random.shuffle(palette);
+palette = palette.slice(0, random.rangeFloor(2, palette.length + 1));
+
+const background = palette.shift();
 
 const settings = {
-    dimensions: [2048, 2048]
+    dimensions: [ 2048, 2048 ]
 };
 
 const sketch = () => {
-    const count = 100;
-    const createGrid = () => {
+    const count = 30;
 
-        // const palette = random.pick(palettes);
-        const palette = ['#F8C75E', '#FFBA4D', '#EDA252', '#EAAC4C'];
+    const createGrid = () => {
         const points = [];
         for (let x = 0; x < count; x++) {
             for (let y = 0; y < count; y++) {
-                const u = count <= 1 ? 0.5 : x / (count - 1);
-                const v = count <= 1 ? 0.5 : y / (count - 1);
-                const radius = Math.abs(random.noise2D(u, v) * 0.5);
+                const u = x / (count - 1);
+                const v = y / (count - 1);
+                const position = [ u, v ];
                 points.push({
                     color: random.pick(palette),
-                    radius: Math.max(0, random.gaussian() * 0.03),
-                    position: [u, v],
-                    rotation: radius
+                    radius: Math.abs(30 + 20 * random.gaussian()),
+                    position
                 });
             }
         }
         return points;
     };
 
-    // random.setSeed(512);
-    const points = createGrid().filter(() => random.value() > 0.25);
-    // const alphabet = ["a ", "b ", "c ", "d ", "e ", "f ", "g ", "h ", "i ", "j ", "k ", "l ", "m ", "n ", "o ", "p ", "q ", "r ", "s ", "t ", "u ", "v ", "w ", "x ", "y", "z"];
-    const alphabet = ["=","-"];
-    const margin = 200;
+    let points = createGrid().filter(() => {
+        return Math.random() > 0.75;
+    });
 
-    return ({context, width, height}) => {
-        context.fillStyle = '#E65100';
+    points = random.shuffle(points);
+
+    return ({ context, width, height }) => {
+        const margin = width * 0.175;
+
+        context.fillStyle = background;
         context.fillRect(0, 0, width, height);
-        points.forEach((data) => {
+
+        points.forEach(data => {
             const {
                 position,
                 radius,
-                color,
-                rotation
+                color
             } = data;
-            const [u, v] = position;
-            const x = lerp(margin, width - margin, u);
-            const y = lerp(margin, height - margin, v);
+            const x = lerp(margin, width - margin, position[0]);
+            const y = lerp(margin, height - margin, position[1]);
 
-            // context.beginPath();
-            // context.arc(x, y, radius * width, 0, Math.PI * 2, false);
-            // context.strokeStyle = 'black';
-            // context.lineWidth = 5;
-            // context.stroke();
-            context.save();
-            const letter = random.pick(alphabet);
-            context.font = `${radius * width}px Helvetica`;
+            context.beginPath();
+            context.arc(x, y, radius, 0, Math.PI * 2);
             context.fillStyle = color;
-            context.fillText(letter, x, y);
-            context.translate(x, y);
-            context.rotate(rotation);
-            context.restore();
+            context.fill();
         });
     };
 };
+
 canvasSketch(sketch, settings);
-
-const button = document.createElement('button');
-const buttonDiv = document.createElement('div');
-button.innerText = 'Reset';
-buttonDiv.appendChild(button);
-document.body.appendChild(buttonDiv);
-button.addEventListener('click', () => {
-    window.location.reload();
-    // sketch();
-});
-document.body.style.flexDirection = 'column';
-
