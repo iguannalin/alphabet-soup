@@ -1,21 +1,16 @@
 const canvasSketch = require('canvas-sketch');
 const { lerp } = require('canvas-sketch-util/math');
-const palettes = require('nice-color-palettes/1000.json');
 const random = require('canvas-sketch-util/random');
-
-let palette = random.pick(palettes);
-
-palette = random.shuffle(palette);
-palette = palette.slice(0, random.rangeFloor(2, palette.length + 1));
-
-const background = palette.shift();
 
 const settings = {
     dimensions: [ 2048, 2048 ]
 };
 
-const sketch = () => {
-    const count = 30;
+const sketch = async () => {
+    const count = 20;
+    const characters = '←↑→↓AB'.split('');
+    const background = 'hsl(0, 0%, 96%)';
+    const palette = ['hsl(0, 0%, 10%)'];
 
     const createGrid = () => {
         const points = [];
@@ -24,22 +19,37 @@ const sketch = () => {
                 const u = x / (count - 1);
                 const v = y / (count - 1);
                 const position = [ u, v ];
+                const character = random.pick(characters);
+                const r = /[AB]/i.test(character) ? 25 : 50;
+                const e = /[AB]/i.test(character) ? 10 : 20;
                 points.push({
                     color: random.pick(palette),
-                    radius: Math.abs(30 + 20 * random.gaussian()),
-                    position
+                    radius: Math.abs(r + e * random.gaussian()),
+                    position,
+                    character
                 });
             }
         }
         return points;
     };
 
-    let points = createGrid().filter(() => {
-        return Math.random() > 0.75;
-    });
+    let points = createGrid().filter(() => random.chance(0.5));
+    //
+    // // We can use Browser's "FontFace" API to load fonts from JavaScript
+    // // This will ensure the font is renderable before first drawing to Canvas
+    // const fontUrl = 'assets/fonts/SpaceGrotesk-Medium.woff';
+    // const font = new window.FontFace(
+    //     'SpaceGrotesk-Medium',
+    //     `url(${fontUrl})`
+    // );
+    //
+    // // We use async/await ES6 syntax to wait for the font to load
+    // await font.load();
+    //
+    // // Add the loaded font to the document
+    // document.fonts.add(font);
 
-    points = random.shuffle(points);
-
+    // Now return a render function for the sketch
     return ({ context, width, height }) => {
         const margin = width * 0.175;
 
@@ -50,15 +60,18 @@ const sketch = () => {
             const {
                 position,
                 radius,
-                color
+                color,
+                character
             } = data;
             const x = lerp(margin, width - margin, position[0]);
             const y = lerp(margin, height - margin, position[1]);
 
-            context.beginPath();
-            context.arc(x, y, radius, 0, Math.PI * 2);
+            // Draw the character
             context.fillStyle = color;
-            context.fill();
+            context.font = `${radius}px "Helvetica"`;
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+            context.fillText(character, x, y);
         });
     };
 };
