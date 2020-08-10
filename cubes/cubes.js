@@ -6,7 +6,9 @@ const palettes = require('nice-color-palettes');
 
 const settings = {
     animate: true,
-    dimensions: [1024, 1280],
+    dimensions: [512, 512],
+    fps: 24,
+    duration: 4,
     // Get a WebGL canvas rather than 2D
     context: 'webgl',
     // Turn on MSAA
@@ -76,8 +78,8 @@ const sketch = ({context, width, height}) => {
             camera.updateProjectionMatrix();
         },
         // And render events here
-        render({time}) {
-            scene.rotation.z = time;
+        render({playhead}) {
+            scene.rotation.z = playhead * Math.PI * 2;
             // Draw scene with our camera
             renderer.render(scene, camera);
         },
