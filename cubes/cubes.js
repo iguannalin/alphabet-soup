@@ -3,6 +3,8 @@ global.THREE = require('three');
 const canvasSketch = require('canvas-sketch');
 const random = require('canvas-sketch-util/random');
 const palettes = require('nice-color-palettes');
+const eases = require('eases');
+const BezierEasing = require('bezier-easing');
 
 const settings = {
     animate: true,
@@ -52,6 +54,8 @@ const sketch = ({context, width, height}) => {
     light.position.set(0, 0, 4);
     scene.add(light);
 
+    const easeFn = BezierEasing(1,.42,0,-0.67);
+
 
     // draw each frame
     return {
@@ -79,8 +83,9 @@ const sketch = ({context, width, height}) => {
         },
         // And render events here
         render({playhead}) {
-            scene.rotation.z = playhead * Math.PI * 2;
-            // Draw scene with our camera
+            const t = Math.sin(playhead * Math.PI);
+            scene.rotation.z = easeFn(t);
+                // Draw scene with our camera
             renderer.render(scene, camera);
         },
         // Dispose of WebGL context (optional)
